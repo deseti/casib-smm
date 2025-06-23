@@ -15,6 +15,8 @@ interface DepositInstruction {
   unique_amount: number;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function DepositPage() {
     const [amount, setAmount] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +41,7 @@ export default function DepositPage() {
         try {
             const token = localStorage.getItem('jwt_token') || localStorage.getItem('google_token');
             if (!token) throw new Error('Sesi tidak valid.');
-            const response = await fetch('http://localhost:3001/api/deposits/create', {
+            const response = await fetch(`${API_BASE_URL}/api/deposits/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

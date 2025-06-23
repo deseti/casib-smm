@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Badge } from "@/components/ui/badge"
 import toast, { Toaster } from 'react-hot-toast'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 // Simple Textarea component
 const Textarea = ({ className, ...props }: any) => (
   <textarea 
@@ -65,7 +67,7 @@ export default function MassOrderPage() {
           throw new Error("Sesi tidak valid, silakan login ulang.")
         }
 
-        const response = await fetch("http://localhost:3001/api/services", {
+        const response = await fetch(`${API_BASE_URL}/api/services`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!response.ok) throw new Error("Gagal memuat layanan dari server")
@@ -197,7 +199,7 @@ export default function MassOrderPage() {
 
     try {
       const token = localStorage.getItem('jwt_token')
-      const response = await fetch('http://localhost:3001/api/orders/mass', {
+      const response = await fetch(`${API_BASE_URL}/api/orders/mass`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

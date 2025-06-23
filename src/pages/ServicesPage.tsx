@@ -19,6 +19,8 @@ import {
   Star,
 } from "lucide-react"
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 // Definisikan tipe data untuk satu layanan
 interface Service {
   id: number
@@ -51,7 +53,7 @@ export default function ServicesPage() {
           throw new Error("Sesi tidak valid, silakan login ulang.")
         }
 
-        const response = await fetch("http://localhost:3001/api/services", {
+        const response = await fetch(`${API_BASE_URL}/api/services`, {
           headers: {
             // Lampirkan token untuk autentikasi
             Authorization: `Bearer ${token}`,
@@ -86,21 +88,8 @@ export default function ServicesPage() {
   })
 
   // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1)
+  useEffect(() => {    setCurrentPage(1)
   }, [searchTerm, selectedCategory])
-
-  // Group services by category
-  const groupedServices = filteredServices.reduce(
-    (acc, service) => {
-      if (!acc[service.category]) {
-        acc[service.category] = []
-      }
-      acc[service.category].push(service)
-      return acc
-    },
-    {} as Record<string, Service[]>,
-  )
 
   // Pagination logic
   const totalItems = filteredServices.length

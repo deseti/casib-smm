@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 interface UserProfile {
   id: string;
   email: string;
@@ -55,7 +57,7 @@ function SettingsPage() {
       const token = localStorage.getItem('jwt_token');
       try {
         // Gunakan endpoint profile yang sudah ada di dashboard.js
-        const profileResponse = await fetch('http://localhost:3001/api/dashboard/profile', {
+        const profileResponse = await fetch(`${API_BASE_URL}/api/dashboard/profile`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -117,7 +119,7 @@ function SettingsPage() {
   const refreshProfile = async () => {
     const token = localStorage.getItem('jwt_token');
     try {
-      const profileResponse = await fetch('http://localhost:3001/api/dashboard/profile', {
+      const profileResponse = await fetch(`${API_BASE_URL}/api/dashboard/profile`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -152,7 +154,7 @@ function SettingsPage() {
       const token = localStorage.getItem('jwt_token');
       
       // Update profile data
-      const response = await fetch('http://localhost:3001/api/user/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/user/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -200,7 +202,7 @@ function SettingsPage() {
     try {
       const token = localStorage.getItem('jwt_token');
       
-      const response = await fetch('http://localhost:3001/api/user/change-password', {
+      const response = await fetch(`${API_BASE_URL}/api/user/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -256,7 +258,7 @@ function SettingsPage() {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await fetch('http://localhost:3001/api/user/avatar', {
+      const response = await fetch(`${API_BASE_URL}/api/user/avatar`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

@@ -26,10 +26,14 @@ router.post('/', async (req, res) => {
     const userId = req.user.id;
     const { service_id, quantity, link } = req.body;
     
-    try {        // 1. Ambil detail service untuk mendapatkan provider_service_id dan harga
+    try {        
+        // 1. Ambil detail service untuk mendapatkan provider info dan harga
         const { data: service, error: serviceError } = await supabase
-            .from('services')
-            .select('provider_service_id, price_per_1000, original_price, min_order, max_order, name')
+            .from('services_with_provider')
+            .select(`
+                id, provider_service_id, price_per_1000, original_price, min_order, max_order, name,
+                provider_id, provider_name, provider_display_name, provider_api_url
+            `)
             .eq('id', service_id)
             .single();
 
@@ -39,6 +43,25 @@ router.post('/', async (req, res) => {
 
         if (!service.provider_service_id) {
             return res.status(400).json({ error: 'Layanan ini belum memiliki provider_service_id' });
+        }
+
+        if (!service.provider_id) {
+            return res.status(400).json({ error: 'Provider untuk layanan ini tidak ditemukan' });
+        }
+
+        // Get provider credentials
+        const { data: provider, error: providerError } = await supabase
+            .from('providers')
+            .select('*')
+            .eq('id', service.provider_id)
+            .single();
+
+        if (providerError || !provider) {
+            return res.status(400).json({ error: 'Provider tidak ditemukan atau tidak aktif' });
+        }
+
+        if (!provider.is_active) {
+            return res.status(400).json({ error: 'Provider sedang tidak aktif' });
         }
 
         // 2. Validasi quantity
@@ -78,20 +101,23 @@ router.post('/', async (req, res) => {
                 error: 'Saldo tidak mencukupi',
                 required: userPrice,
                 current: userData.balance
-            });
-        }// 5. Buat order ke provider CentralSMM (SESUAI DOKUMENTASI)
-        const providerApiUrl = 'https://centralsmm.co.id/api/order';
-        const { CENTRALSMM_API_ID, CENTRALSMM_API_KEY, CENTRALSMM_SECRET_KEY } = process.env;
+            });        }
+
+        // 5. Buat order ke provider menggunakan provider credentials
+        const providerApiUrl = `${provider.api_url}/order`;
 
         const formBody = new URLSearchParams();
-        formBody.append('api_id', CENTRALSMM_API_ID);
-        formBody.append('api_key', CENTRALSMM_API_KEY);
-        formBody.append('secret_key', CENTRALSMM_SECRET_KEY);
-        formBody.append('service', service.provider_service_id.toString()); // Sesuai dokumentasi: 'service'
-        formBody.append('target', link); // Sesuai dokumentasi: 'target'
+        formBody.append('api_id', provider.api_id);
+        formBody.append('api_key', provider.api_key);
+        if (provider.secret_key) {
+            formBody.append('secret_key', provider.secret_key);
+        }
+        formBody.append('service', service.provider_service_id.toString());
+        formBody.append('target', link);
         formBody.append('quantity', quantity.toString());
 
-        console.log('Mengirim order ke CentralSMM dengan parameter yang benar:', {
+        console.log(`Mengirim order ke ${provider.display_name} dengan parameter yang benar:`, {
+            provider: provider.display_name,
             provider_service_id: service.provider_service_id,
             target: link,
             quantity,
@@ -175,12 +201,13 @@ router.post('/mass', async (req, res) => {
             return res.status(400).json({ 
                 error: 'Maksimal 100 links per mass order' 
             });
-        }
-
-        // 1. Ambil detail service
+        }        // 1. Ambil detail service dengan provider info
         const { data: service, error: serviceError } = await supabase
-            .from('services')
-            .select('provider_service_id, price_per_1000, original_price, min_order, max_order, name')
+            .from('services_with_provider')
+            .select(`
+                id, provider_service_id, price_per_1000, original_price, min_order, max_order, name,
+                provider_id, provider_name, provider_display_name, provider_api_url
+            `)
             .eq('id', service_id)
             .single();
 
@@ -190,6 +217,25 @@ router.post('/mass', async (req, res) => {
 
         if (!service.provider_service_id) {
             return res.status(400).json({ error: 'Layanan ini belum memiliki provider_service_id' });
+        }
+
+        if (!service.provider_id) {
+            return res.status(400).json({ error: 'Provider untuk layanan ini tidak ditemukan' });
+        }
+
+        // Get provider credentials
+        const { data: provider, error: providerError } = await supabase
+            .from('providers')
+            .select('*')
+            .eq('id', service.provider_id)
+            .single();
+
+        if (providerError || !provider) {
+            return res.status(400).json({ error: 'Provider tidak ditemukan atau tidak aktif' });
+        }
+
+        if (!provider.is_active) {
+            return res.status(400).json({ error: 'Provider sedang tidak aktif' });
         }
 
         // 2. Validasi quantity
@@ -237,16 +283,14 @@ router.post('/mass', async (req, res) => {
                 current: userData.balance,
                 links_count: links.length
             });
-        }
-
-        // 5. Kirim mass order ke CentralSMM
-        const providerApiUrl = 'https://centralsmm.co.id/api/order';
-        const { CENTRALSMM_API_ID, CENTRALSMM_API_KEY, CENTRALSMM_SECRET_KEY } = process.env;
+        }        // 5. Kirim mass order ke provider
+        const providerApiUrl = `${provider.api_url}/order`;
 
         // Filter dan bersihkan links
         const cleanLinks = links.map(link => link.trim()).filter(link => link.length > 0);
         
-        console.log('📦 Sending mass order to CentralSMM:', {
+        console.log(`📦 Sending mass order to ${provider.display_name}:`, {
+            provider: provider.display_name,
             service: service.provider_service_id,
             quantity: quantity,
             links: cleanLinks.length,
@@ -261,9 +305,11 @@ router.post('/mass', async (req, res) => {
         for (const link of cleanLinks) {
             try {
                 const formBody = new URLSearchParams();
-                formBody.append('api_id', CENTRALSMM_API_ID);
-                formBody.append('api_key', CENTRALSMM_API_KEY);
-                formBody.append('secret_key', CENTRALSMM_SECRET_KEY);
+                formBody.append('api_id', provider.api_id);
+                formBody.append('api_key', provider.api_key);
+                if (provider.secret_key) {
+                    formBody.append('secret_key', provider.secret_key);
+                }
                 formBody.append('service', service.provider_service_id.toString());
                 formBody.append('target', link);
                 formBody.append('quantity', quantity.toString());
@@ -363,89 +409,7 @@ router.post('/mass', async (req, res) => {
     }
 });
 
-// Endpoint untuk sync status semua order pending
-router.post('/sync-status', async (req, res) => {
-    try {
-        console.log('Memulai sync status order dengan provider...');
-          // Ambil semua order yang statusnya pending/processing
-        const { data: pendingOrders, error: orderError } = await supabase
-            .from('orders')
-            .select('id, provider_order_id, status')
-            .in('status', ['pending', 'processing', 'Processing', 'in_progress', 'In Progress'])
-            .not('provider_order_id', 'is', null);
-
-        if (orderError) {
-            throw orderError;
-        }
-
-        if (!pendingOrders || pendingOrders.length === 0) {
-            return res.json({ 
-                message: 'Tidak ada order pending yang perlu disync',
-                synced_count: 0
-            });
-        }
-
-        console.log(`Ditemukan ${pendingOrders.length} order pending untuk disync`);
-
-        const providerApiUrl = 'https://centralsmm.co.id/api/status';
-        const { CENTRALSMM_API_ID, CENTRALSMM_API_KEY, CENTRALSMM_SECRET_KEY } = process.env;
-        let syncedCount = 0;
-        let errors = [];        // Sync status satu per satu (SESUAI DOKUMENTASI)
-        for (const order of pendingOrders) {
-            try {
-                const formBody = new URLSearchParams();
-                formBody.append('api_id', CENTRALSMM_API_ID);
-                formBody.append('api_key', CENTRALSMM_API_KEY);
-                formBody.append('secret_key', CENTRALSMM_SECRET_KEY);
-                formBody.append('id', order.provider_order_id); // Sesuai dokumentasi: 'id' bukan 'order_id'
-
-                const response = await fetch(providerApiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formBody.toString(),
-                });                const data = await response.json();
-
-                // Sesuai dokumentasi: {response: true, data: {id, price, status, start_count, remains}}
-                if (data.response && data.data) {
-                    // Update status di database lokal
-                    const { error: updateError } = await supabase.rpc('sync_order_status_with_provider', {
-                        p_provider_order_id: order.provider_order_id,
-                        p_status: data.data.status,
-                        p_start_count: data.data.start_count,
-                        p_remains: data.data.remains
-                    });
-
-                    if (!updateError) {
-                        syncedCount++;
-                        console.log(`Order ${order.id} (${order.provider_order_id}) status updated to: ${data.data.status}`);
-                    } else {
-                        errors.push(`Error updating order ${order.id}: ${updateError.message}`);
-                    }
-                } else {
-                    errors.push(`Error from provider for order ${order.provider_order_id}: ${data.data?.msg || 'Unknown error'}`);
-                }
-
-                // Delay kecil untuk tidak overload API
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-            } catch (err) {
-                errors.push(`Error syncing order ${order.id}: ${err.message}`);
-            }
-        }
-
-        res.json({
-            message: `Sync completed. ${syncedCount} orders updated`,
-            synced_count: syncedCount,
-            total_orders: pendingOrders.length,
-            errors: errors.length > 0 ? errors : undefined
-        });
-
-    } catch (error) {
-        console.error('Error in sync status:', error);
-        res.status(500).json({ error: 'Terjadi kesalahan saat sync status' });
-    }
-});
+// DEPRECATED: Endpoint sync-status lama sudah dipindah ke multi-provider system
+// Gunakan POST /api/providers/:id/sync-orders untuk sync order status per provider
 
 module.exports = router;

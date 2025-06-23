@@ -16,6 +16,8 @@ import {
   Trash2
 } from "lucide-react";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 interface Notification {
   id: string;
   type: 'success' | 'warning' | 'info' | 'error';
@@ -37,7 +39,7 @@ export default function NotificationsPage() {
     const fetchNotifications = async () => {
       const token = localStorage.getItem('jwt_token');
       try {
-        const response = await fetch('http://localhost:3001/api/notifications', {
+        const response = await fetch(`${API_BASE_URL}/api/notifications`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -77,7 +79,7 @@ export default function NotificationsPage() {
   const markAsRead = async (id: string) => {
     const token = localStorage.getItem('jwt_token');
     try {
-      const response = await fetch(`http://localhost:3001/api/notifications/${id}/read`, {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/${id}/read`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -99,7 +101,7 @@ export default function NotificationsPage() {
   const markAllAsRead = async () => {
     const token = localStorage.getItem('jwt_token');
     try {
-      const response = await fetch('http://localhost:3001/api/notifications/read-all', {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/read-all`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -117,7 +119,7 @@ export default function NotificationsPage() {
   const deleteNotification = async (id: string) => {
     const token = localStorage.getItem('jwt_token');
     try {
-      const response = await fetch(`http://localhost:3001/api/notifications/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/notifications/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

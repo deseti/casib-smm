@@ -40,7 +40,7 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/referral/validate-code?code=${code.trim()}`);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/referral/validate-code?code=${code.trim()}`);
       const data = await response.json();
       
       if (response.ok && data.valid) {
@@ -85,7 +85,7 @@ export default function LoginPage() {
     const idToken = credentialResponse.credential;
 
     try {
-      const response = await fetch('http://localhost:3001/auth/verify-token', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/verify-token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: idToken }),
@@ -114,7 +114,7 @@ export default function LoginPage() {
     setIsLoading(true);
     setError('');
     try {
-        const response = await fetch('http://localhost:3001/auth/login', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
@@ -139,7 +139,7 @@ export default function LoginPage() {
     setSuccess('');
     
     try {
-      const response = await fetch('http://localhost:3001/auth/forgot-password', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: resetEmail }),
@@ -179,7 +179,7 @@ export default function LoginPage() {
           registerData.referral_code = referralCode.trim();
         }
 
-        const response = await fetch('http://localhost:3001/auth/register', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(registerData),

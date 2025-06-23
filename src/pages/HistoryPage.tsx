@@ -18,6 +18,8 @@ interface Order {
   };
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function HistoryPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +28,7 @@ export default function HistoryPage() {
   const fetchOrders = async () => {
     const token = localStorage.getItem('jwt_token');
     try {
-      const response = await fetch('http://localhost:3001/api/orders', {
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -47,7 +49,7 @@ export default function HistoryPage() {
     setIsSyncing(true);
     
     try {
-      const response = await fetch('http://localhost:3001/api/orders/sync-status', {
+      const response = await fetch(`${API_BASE_URL}/api/orders/sync-status`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

@@ -45,6 +45,9 @@
 - **User Management** - Kelola semua user dan aktivitas mereka
 - **Deposit Management** - Approve/reject deposit dengan catatan
 - **Service Sync** - Sinkronisasi layanan otomatis dari provider dengan markup
+- **Multi Provider Management** - Kelola multiple SMM service providers
+- **Provider Testing** - Test koneksi dan validasi credentials provider
+- **Bulk Sync** - Sinkronisasi layanan dari semua provider sekaligus
 - **Referral Management** - Kelola komisi referral dan payout
 - **Real-time Monitoring** - Monitor sistem secara real-time
 
@@ -54,6 +57,29 @@
 - **Real-time Status** - Update status pesanan real-time dari provider
 - **Error Handling** - Penanganan error yang robust
 - **Provider Testing** - Tools untuk test koneksi dan status provider
+
+### 🔗 Multi Provider System
+
+**Casib SMM Panel** mendukung sistem multi-provider yang memungkinkan admin untuk:
+
+#### Provider Management
+- **Multiple Providers** - Kelola multiple SMM service providers dalam satu panel
+- **Provider Configuration** - Set API credentials, markup percentage, dan status untuk setiap provider
+- **Dynamic Markup** - Set markup percentage yang berbeda untuk setiap provider
+- **Provider Status** - Enable/disable provider tanpa menghapus konfigurasi
+- **Auto Service Sync** - Sync layanan dari provider yang aktif secara otomatis
+
+#### Provider Features
+- **Connection Testing** - Test koneksi dan validasi credentials setiap provider
+- **Bulk Operations** - Sync semua provider sekaligus atau individual
+- **Service Management** - Layanan dari berbagai provider dalam satu interface
+- **Order Routing** - Automatic routing pesanan ke provider yang sesuai
+- **Fallback Support** - Support untuk provider backup jika primary gagal
+
+#### Supported Provider Types
+- **CentralSMM** - Default provider dengan full feature support
+- **Generic SMM** - Support untuk provider SMM standard lainnya
+- **Custom Integration** - Dapat dikustomisasi untuk provider dengan API khusus
 
 ## 🏗️ Arsitektur Teknologi
 
@@ -101,13 +127,24 @@ Database Tables:
 │   └── referral_earnings (Total earnings)
 ├── services (SMM Services dengan markup dari Provider)
 │   ├── id (Primary Key)
-│   ├── provider_service_id (CentralSMM service ID)
+│   ├── provider_id (Foreign Key to providers)
+│   ├── provider_service_id (Provider service ID)
 │   ├── name (Service name)
 │   ├── category (Service category)
-│   ├── price_per_1000 (Price with 10% markup)
+│   ├── price_per_1000 (Price with markup)
 │   ├── original_price (Original provider price)
 │   ├── min_order, max_order (Order limits)
 │   └── description (Service description)
+├── providers (Multi Provider Management)
+│   ├── id (Primary Key)
+│   ├── name (Internal provider name)
+│   ├── display_name (Public display name)
+│   ├── api_url (Provider API endpoint)
+│   ├── api_id, api_key, secret_key (Credentials)
+│   ├── markup_percentage (Markup percentage)
+│   ├── is_active (Provider status)
+│   ├── sync_services (Auto sync toggle)
+│   └── created_at, updated_at (Timestamps)
 ├── orders (Single & Mass Orders dengan tracking)
 │   ├── id (Primary Key)
 │   ├── user_id (Foreign Key to users)
@@ -174,6 +211,10 @@ Store to Database → Update Existing Services
 Background Jobs:
 Auto Status Sync (1 hour interval) → Check Pending Orders → 
 Update from CentralSMM → Update Local Database
+
+Multi Provider System:
+Provider Registration → Credential Validation → Service Sync → 
+Markup Application → Order Routing → Provider Selection
 ```
 
 ## 📦 Setup & Installation
@@ -670,363 +711,110 @@ Approve komisi referral
   "notes": "Commission approved and added to balance"
 }
 ```
-```
 
-**Backend:**
+## 🔧 Multi Provider Setup
+
+## 🎯 Multi Provider Summary
+
+**Status: ✅ SELESAI** - Sistem Multi Provider telah diimplementasi dengan lengkap!
+
+### ✅ Yang Sudah Selesai:
+
+1. **Database Schema** ✅
+   - Tabel `providers` dengan field fleksibel untuk berbagai format API
+   - View `services_with_provider` untuk query yang mudah
+   - Function `get_provider_auth_data` untuk format credentials
+   - Indexes dan triggers untuk performa optimal
+
+2. **Backend API** ✅
+   - `/api/providers` - CRUD management providers
+   - `/api/providers/:id/test` - Test koneksi dengan format-specific handling
+   - `/api/providers/:id/sync-services` - Sync services per provider
+   - `/api/providers/sync-all` - Bulk sync semua providers
+   - Support untuk: CentralSMM, PanelChild, JustAnother, Standard, Token, Custom
+
+3. **Frontend Interface** ✅
+   - `AdminMultiProviderPage.tsx` - Interface komprehensif untuk manage providers
+   - Form add/edit provider dengan semua field yang dibutuhkan
+   - Test connection per provider
+   - Sync services individual dan bulk
+   - Display status dan results
+
+4. **Documentation** ✅
+   - `SMM_PROVIDER_TEMPLATES.md` - Template dan mapping untuk berbagai provider
+   - `QUICK_SETUP_TEMPLATES.md` - Copy-paste templates untuk setup cepat
+   - `MULTI_PROVIDER_SETUP.md` - Setup instructions lengkap
+
+5. **Setup Scripts** ✅
+   - `setup-multi-provider.js` - Automated setup script
+   - `test-multi-provider.js` - Test functionality script
+   - `multi_provider_schema.sql` - Manual SQL setup
+
+### 🚀 Fitur Multi Provider:
+
+#### Provider Management
+- ✅ **Add/Edit/Delete** providers via admin panel
+- ✅ **Flexible API Support** - CentralSMM, PanelChild, Standard, Token, Custom
+- ✅ **Test Connection** untuk setiap provider
+- ✅ **Dynamic Markup** percentage per provider
+- ✅ **Provider Status** (Active/Inactive)
+- ✅ **Auto Sync Services** toggle
+
+#### API Format Support
+- ✅ **CentralSMM Format** (api_id + api_key + secret_key)
+- ✅ **PanelChild Format** (key + action)
+- ✅ **Standard Format** (api_id/user_id + api_key)
+- ✅ **Token Based** (Bearer token authentication)
+- ✅ **Custom Format** (flexible field mapping)
+
+#### Authentication Methods
+- ✅ **Form Data** (application/x-www-form-urlencoded)
+- ✅ **JSON Body** (application/json)
+- ✅ **Header Auth** (Authorization: Bearer token)
+
+#### Advanced Features
+- ✅ **Rate Limiting** per provider
+- ✅ **Custom Endpoints** configuration
+- ✅ **Provider Metadata** (country, type, notes)
+- ✅ **Bulk Operations** (sync all providers)
+- ✅ **Error Handling** dengan detailed messages
+
+### 📋 Cara Setup:
+
+#### Otomatis (Recommended):
 ```bash
-cd backend
-npm install
-# atau
-pnpm install
+node setup-multi-provider.js
 ```
 
-### 3. Environment Setup
-
-**Frontend (.env):**
-```env
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-**Backend (.env):**
-```env
-# Supabase Configuration
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-# JWT Secret
-JWT_SECRET=your_jwt_secret_key
-
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-
-# CentralSMM Provider
-CENTRALSMM_API_ID=your_centralsmm_api_id
-CENTRALSMM_API_KEY=your_centralsmm_api_key
-CENTRALSMM_SECRET_KEY=your_centralsmm_secret_key
-
-# Email Configuration (Optional)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password
-```
-
-### 4. Database Setup
-
-**Jalankan SQL Scripts di Supabase SQL Editor:**
-
-1. **Setup Database:**
-```sql
--- Jalankan file: setup_database.sql
-```
-
-2. **Setup Referral System:**
-```sql
--- Jalankan file: referral_system.sql
--- Atau: setup_referral_complete.sql
-```
-
-3. **Update Orders Table:**
-```sql
--- Jalankan file: update_orders_table.sql
-```
-
-### 5. Jalankan Aplikasi
-
-**Development Mode:**
-
-Terminal 1 (Frontend):
-```bash
-npm run dev
-# Buka: http://localhost:5173
-```
-
-Terminal 2 (Backend):
-```bash
-cd backend
-node index.js
-# Server: http://localhost:3001
-```
-
-**Production Build:**
-```bash
-npm run build
-npm run preview
-```
-
-## 🎯 Panduan Penggunaan
-
-### Untuk User
-
-#### 1. **Registrasi & Login**
-- Daftar dengan email/password atau Google
-- Gunakan kode referral untuk bonus (opsional)
-- Verifikasi email jika diperlukan
-
-#### 2. **Deposit Saldo**
-- Masuk ke halaman Deposit
-- Masukkan nominal deposit
-- Transfer ke nomor virtual account yang diberikan
-- Tunggu konfirmasi admin
-
-#### 3. **Membuat Order**
-- **Single Order:** Pilih layanan → Masukkan link → Tentukan quantity → Order
-- **Mass Order:** Pilih layanan → Masukkan multiple link → Order sekaligus
-
-#### 4. **Tracking Order**
-- Lihat status real-time di History
-- Status: Pending → Processing → Completed/Cancelled
-
-#### 5. **Program Referral**
-- Dapatkan kode referral unik
-- Share ke teman melalui link khusus
-- Terima komisi 5% dari transaksi referral
-
-### Untuk Admin
-
-#### 1. **Manajemen Deposit**
-- Review deposit pending
-- Approve/reject deposit user
-- Monitor history pembayaran
-
-#### 2. **Manajemen Services**
-- Sync layanan dari CentralSMM
-- Update harga dengan markup 10%
-- Monitor performa layanan
-
-#### 3. **Manajemen Referral**
-- Review komisi pending
-- Approve pembayaran komisi
-- Monitor top referrers
-
-#### 4. **Provider Management**
-- Test koneksi ke CentralSMM
-- Sync status order otomatis
-- Monitor API usage
-
-## 🔗 Integrasi Provider
-
-### CentralSMM Integration
-
-Platform terintegrasi penuh dengan **CentralSMM** sebagai provider utama:
-
-#### Features:
-- ✅ **Auto Service Sync** - Sinkronisasi layanan otomatis
-- ✅ **Real-time Order** - Pembuatan order langsung ke provider
-- ✅ **Status Tracking** - Monitoring status real-time
-- ✅ **Markup System** - Profit 10% otomatis
-- ✅ **Auto-sync Status** - Update status setiap 1 jam
-
-#### API Endpoints Used:
-```javascript
-// Get Services
-POST https://centralsmm.co.id/api/services
-
-// Create Order  
-POST https://centralsmm.co.id/api/create-order
-
-// Check Status
-POST https://centralsmm.co.id/api/status
-```
-
-## 📱 API Documentation
-
-### Authentication Endpoints
-```
-POST /auth/register          # Register user baru
-POST /auth/login             # Login dengan email/password
-POST /auth/verify-token      # Verify Google OAuth token
-POST /auth/forgot-password   # Request reset password
-POST /auth/reset-password    # Reset password dengan token
-```
-
-### User Endpoints
-```
-GET  /api/dashboard/stats    # Dashboard statistics
-GET  /api/services           # List semua layanan
-POST /api/orders/create      # Buat order single
-POST /api/orders/mass        # Buat mass order
-GET  /api/orders/history     # History order user
-POST /api/deposits/create    # Buat deposit request
-```
-
-### Referral Endpoints
-```
-GET  /api/referral/my-stats        # Statistik referral user
-GET  /api/referral/validate-code   # Validasi kode referral
-POST /api/referral/share          # Generate sharing links
-```
-
-### Admin Endpoints
-```
-GET  /api/admin/users              # List semua user
-GET  /api/admin/deposits/pending   # Deposit pending approval
-POST /api/admin/deposits/approve   # Approve deposit
-POST /api/admin/sync-services      # Sync layanan dari provider
-GET  /api/admin/referral/stats     # Admin referral statistics
-POST /api/admin/referral/approve   # Approve komisi referral
-```
-
-## 🔧 Konfigurasi
-
-### Markup Configuration
-```javascript
-// Default markup 10% di backend/provider.js
-const MARKUP_PERCENTAGE = 0.10; // 10%
-```
-
-### Auto-sync Configuration
-```javascript
-// Interval sync di backend/index.js
-cron.schedule('0 * * * *', async () => {
-  // Setiap 1 jam sekali
-  await autoSyncOrderStatus();
-});
-```
-
-### Email Configuration
-Setup untuk fitur lupa password:
-```javascript
-// backend/emailService.js
-const transporter = nodemailer.createTransporter({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-```
-
-## 🛡️ Keamanan
-
-### Implementasi Keamanan:
-- **JWT Token** dengan expiry 24 jam
-- **bcrypt** untuk hash password
-- **Input Validation** pada semua endpoint
-- **Role-based Access Control** (RBAC)
-- **SQL Injection Protection** via Supabase ORM
-- **CORS** configuration untuk domain tertentu
-- **Rate Limiting** pada API sensitif
-
-### Best Practices:
-- Environment variables untuk credential
-- Secure password requirements
-- Token refresh mechanism
-- Audit logging untuk admin actions
-
-## 📊 Monitoring & Analytics
-
-### Built-in Analytics:
-- **User Statistics** - Registrasi, login, aktivitas
-- **Order Analytics** - Volume, success rate, revenue
-- **Referral Tracking** - Komisi, top referrers
-- **Provider Performance** - Response time, success rate
-- **Financial Reports** - Deposit, withdraw, profit
-
-### Error Monitoring:
-```javascript
-// Comprehensive error logging
-console.error('Error details:', {
-  endpoint: req.path,
-  user: req.user?.id,
-  error: error.message,
-  timestamp: new Date()
-});
-```
-
-## 🚀 Deployment
-
-### Recommended Stack:
-- **Frontend:** Vercel, Netlify, atau VPS
-- **Backend:** Railway, Heroku, atau VPS
-- **Database:** Supabase (managed PostgreSQL)
-- **CDN:** Cloudflare untuk asset optimization
-
-### Environment Setup:
-```bash
-# Production environment
-NODE_ENV=production
-PORT=3001
-
-# Database
-DATABASE_URL=your_production_db_url
-
-# External Services
-CENTRALSMM_API_URL=https://centralsmm.co.id/api
-```
-
-## 🔄 Update & Maintenance
-
-### Regular Tasks:
-1. **Service Sync** - Update layanan dari provider
-2. **Status Sync** - Update status order otomatis
-3. **Database Cleanup** - Archive old records
-4. **Security Updates** - Update dependencies
-5. **Backup Database** - Regular backup schedule
-
-### Monitoring Checklist:
-- [ ] API Response times
-- [ ] Database performance
-- [ ] Error rates
-- [ ] User activity
-- [ ] Provider connectivity
-
-## 📞 Support & Contact
-
-### Developer Info:
-- **GitHub:** [https://github.com/deseti/casib-smm](https://github.com/deseti/casib-smm)
-- **Repository:** casib-smm
-- **License:** MIT
-
-### Technical Support:
-- Untuk bug reports: Buka issue di GitHub
-- Untuk feature requests: Discussion tab
-- Untuk pertanyaan: Check documentation terlebih dahulu
-
-## 🤝 Contributing
-
-Kontribusi sangat diterima! Silakan:
-
-1. Fork repository
-2. Buat feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push ke branch (`git push origin feature/AmazingFeature`)
-5. Buka Pull Request
-
-### Development Guidelines:
-- Follow TypeScript best practices
-- Write meaningful commit messages
-- Add tests untuk fitur baru
-- Update documentation
-
-## 📝 Changelog
-
-### v1.0.0 (Current)
-- ✅ Complete SMM Panel with provider integration
-- ✅ Referral/Affiliate system
-- ✅ Mass order functionality
-- ✅ Admin panel lengkap
-- ✅ Real-time order tracking
-- ✅ Automated service sync
-- ✅ Modern UI/UX design
-
-### Roadmap:
-- [ ] Mobile app (React Native)
-- [ ] Multi-provider support
-- [ ] Advanced analytics dashboard
-- [ ] API rate limiting
-- [ ] Subscription packages
-- [ ] WhatsApp integration
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-**Built with ❤️ by [Deseti](https://github.com/deseti)**
-
-*Casib SMM Panel - Complete Social Media Marketing Solution*
+#### Manual:
+1. Run SQL dari `multi_provider_schema.sql`
+2. Insert provider dengan `insert_centralsmm_provider.sql`
+3. Access admin panel di `/admin/multi-provider`
+
+### 🎯 Cara Menggunakan:
+
+1. **Login sebagai Admin**
+2. **Buka**: `http://localhost:5173/admin/multi-provider`
+3. **Add Provider**: Klik "Add Provider"
+4. **Isi Form**: Gunakan template dari `QUICK_SETUP_TEMPLATES.md`
+5. **Test Connection**: Pastikan credentials benar
+6. **Save & Sync**: Save provider dan sync services
+
+### 🔧 Template Provider Populer:
+
+| Provider | Format | Auth | Required Fields |
+|----------|--------|------|-----------------|
+| CentralSMM | centralsmm | form | api_id, api_key, secret_key |
+| PanelChild | panelchild | form | api_key |
+| Standard SMM | standard | form | api_id, api_key |
+| Modern API | token | header | token |
+
+### 🎉 Benefits:
+
+1. **Diversifikasi Provider** - Tidak tergantung satu provider
+2. **Flexible Pricing** - Markup berbeda per provider
+3. **Backup Provider** - Jika satu down, ada backup
+4. **Easy Management** - Admin panel yang user-friendly
+5. **Scalable** - Mudah add provider baru
+
+**🚀 Sistem Multi Provider siap digunakan!** Admin tinggal menambah provider melalui interface yang sudah disediakan.

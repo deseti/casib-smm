@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // Interface untuk statistik
 interface Stats {
     balance: number;
@@ -21,7 +23,7 @@ export default function DashboardHomePage() {
         const fetchStats = async () => {
             const token = localStorage.getItem('jwt_token');
             try {
-                const response = await fetch('http://localhost:3001/api/dashboard/stats', {
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (!response.ok) throw new Error('Gagal memuat statistik');
@@ -54,19 +56,45 @@ export default function DashboardHomePage() {
     const displayStats = stats || { balance: 0, totalOrders: 0, pendingOrders: 0, successOrders: 0 };
 
     return (
-        <div className="space-y-6 lg:space-y-8 bg-slate-950 text-white min-h-screen p-4">
+        <div className="space-y-6 lg:space-y-8 bg-slate-950 text-white min-h-screen p-2 sm:p-4">
             {/* Bagian Welcome Section */}
-            <div className="rounded-3xl bg-slate-900 p-8 lg:p-12 shadow-2xl border border-slate-700 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-50"></div>
-                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-full blur-3xl transform translate-x-48 -translate-y-48"></div>
-                <div className="relative z-10"><div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"><div className="text-center lg:text-left"><h1 className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">Selamat Datang di Casib SMM</h1><p className="text-slate-300 text-lg lg:text-xl max-w-2xl leading-relaxed">Platform SMM Panel terdepan untuk mengelola layanan media sosial Anda dengan efisien dan profesional.</p></div><div className="flex justify-center lg:justify-end"><img src="/logos/icon.jpg" alt="Casib SMM" className="w-24 h-24 lg:w-32 lg:h-32 rounded-2xl shadow-2xl border-2 border-slate-600/50 object-cover"/></div></div></div>
+            <div className="rounded-2xl sm:rounded-3xl bg-slate-900 p-4 sm:p-8 lg:p-12 shadow-2xl border border-slate-700 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-50 pointer-events-none"></div>
+                <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Selamat Datang di Dashboard!</h1>
+                        <p className="text-slate-300 text-sm sm:text-base max-w-md">Pantau saldo, pesanan, dan statistik layanan SMM kamu di sini.</p>
+                    </div>
+                    <Button onClick={handleCreateOrder} className="mt-2 sm:mt-0 w-full sm:w-auto">+ Pesan Layanan</Button>
+                </div>
             </div>
 
-            {/* Bagian Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"><div className="group rounded-2xl bg-slate-900 border border-slate-700 p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"><div className="flex items-center justify-between mb-4"><TrendingUp className="h-8 w-8 text-blue-400" /><div className="text-blue-400 text-sm font-medium bg-blue-500/20 px-2 py-1 rounded-full">Total</div></div><h3 className="font-semibold text-blue-200 text-sm mb-2">Total Pesanan</h3><p className="text-3xl lg:text-4xl font-bold text-white">{displayStats.totalOrders}</p></div><div className="group rounded-2xl bg-slate-900 border border-slate-700 p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"><div className="flex items-center justify-between mb-4"><ShoppingCart className="h-8 w-8 text-green-400" /><div className="text-green-400 text-sm font-medium bg-green-500/20 px-2 py-1 rounded-full">Selesai</div></div><h3 className="font-semibold text-green-200 text-sm mb-2">Pesanan Selesai</h3><p className="text-3xl lg:text-4xl font-bold text-white">{displayStats.successOrders}</p></div><div className="group rounded-2xl bg-slate-900 border border-slate-700 p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"><div className="flex items-center justify-between mb-4"><Clock className="h-8 w-8 text-yellow-400" /><div className="text-yellow-400 text-sm font-medium bg-yellow-500/20 px-2 py-1 rounded-full">Pending</div></div><h3 className="font-semibold text-yellow-200 text-sm mb-2">Pesanan Pending</h3><p className="text-3xl lg:text-4xl font-bold text-white">{displayStats.pendingOrders}</p></div><div className="group rounded-2xl bg-slate-900 border border-slate-700 p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"><div className="flex items-center justify-between mb-4"><Wallet className="h-8 w-8 text-purple-400" /><div className="text-purple-400 text-sm font-medium bg-purple-500/20 px-2 py-1 rounded-full">Saldo</div></div><h3 className="font-semibold text-purple-200 text-sm mb-2">Saldo</h3><p className="text-2xl lg:text-3xl font-bold text-white">Rp {displayStats.balance.toLocaleString('id-ID')}</p></div></div>
+            {/* Statistik Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
+                <div className="rounded-xl bg-slate-800 p-3 sm:p-5 flex flex-col items-center text-center">
+                    <Wallet className="w-6 h-6 mb-1 text-emerald-400" />
+                    <div className="text-lg sm:text-xl font-bold">Rp {displayStats.balance.toLocaleString()}</div>
+                    <div className="text-xs sm:text-sm text-slate-400">Saldo</div>
+                </div>
+                <div className="rounded-xl bg-slate-800 p-3 sm:p-5 flex flex-col items-center text-center">
+                    <ShoppingCart className="w-6 h-6 mb-1 text-blue-400" />
+                    <div className="text-lg sm:text-xl font-bold">{displayStats.totalOrders}</div>
+                    <div className="text-xs sm:text-sm text-slate-400">Total Pesanan</div>
+                </div>
+                <div className="rounded-xl bg-slate-800 p-3 sm:p-5 flex flex-col items-center text-center">
+                    <Clock className="w-6 h-6 mb-1 text-yellow-400" />
+                    <div className="text-lg sm:text-xl font-bold">{displayStats.pendingOrders}</div>
+                    <div className="text-xs sm:text-sm text-slate-400">Pending</div>
+                </div>
+                <div className="rounded-xl bg-slate-800 p-3 sm:p-5 flex flex-col items-center text-center">
+                    <TrendingUp className="w-6 h-6 mb-1 text-green-400" />
+                    <div className="text-lg sm:text-xl font-bold">{displayStats.successOrders}</div>
+                    <div className="text-xs sm:text-sm text-slate-400">Sukses</div>
+                </div>
+            </div>
 
             {/* Bagian Aksi Cepat (Tombol Tes Provider dihapus) */}
-            <div className="rounded-3xl bg-slate-900 border border-slate-700 p-8 lg:p-10 shadow-2xl">
+            <div className="rounded-3xl bg-slate-900 border border-slate-700 p-4 sm:p-8 lg:p-10 shadow-2xl">
                 <h3 className="text-2xl lg:text-3xl font-bold text-white mb-6 text-center lg:text-left">Aksi Cepat</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Button onClick={handleCreateOrder} className="h-auto p-6 lg:p-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-left justify-start gap-4 transition-all duration-200 hover:shadow-xl hover:scale-105 rounded-2xl">

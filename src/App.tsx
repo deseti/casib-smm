@@ -13,7 +13,7 @@ import ReferralPage from './pages/ReferralPage';
 import HistoryPage from './pages/HistoryPage';
 import DepositPage from './pages/DepositPage';
 import AdminDepositsPage from './pages/AdminDepositsPage';
-import AdminProviderPage from './pages/AdminProviderPage';
+import AdminMultiProviderPage from './pages/AdminMultiProviderPage';
 import AdminReferralPage from './pages/AdminReferralPage';
 import SettingsPage from './pages/SettingsPage';
 import NotificationsPage from './pages/NotificationsPage';
@@ -60,7 +60,8 @@ export default function App() {
           <Route path="settings" element={<SettingsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="admin/deposits" element={<AdminDepositsPage />} />
-          <Route path="admin/provider" element={<AdminProviderPage />} />
+          <Route path="admin/provider" element={<AdminMultiProviderPage />} />
+          <Route path="admin/multi-provider" element={<AdminMultiProviderPage />} />
           <Route path="admin/referral" element={<AdminReferralPage />} />
         </Route>
       ) : (

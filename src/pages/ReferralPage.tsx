@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import toast, { Toaster } from 'react-hot-toast'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 interface ReferralStats {
   referral_code: string | null
   total_referrals: number
@@ -67,7 +69,7 @@ export default function ReferralPage() {  const [stats, setStats] = useState<Ref
         throw new Error("Sesi tidak valid, silakan login ulang.")
       }
 
-      const response = await fetch("http://localhost:3001/api/referral/my-stats", {
+      const response = await fetch(`${API_BASE_URL}/api/referral/my-stats`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       
@@ -90,7 +92,7 @@ export default function ReferralPage() {  const [stats, setStats] = useState<Ref
     const token = localStorage.getItem("jwt_token")
     
     try {
-      const response = await fetch("http://localhost:3001/api/referral/share", {
+      const response = await fetch(`${API_BASE_URL}/api/referral/share`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

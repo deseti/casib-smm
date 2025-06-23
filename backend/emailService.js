@@ -1,29 +1,19 @@
 // backend/emailService.js
 const nodemailer = require('nodemailer');
 
-// Konfigurasi SMTP - Anda bisa menggunakan Gmail, Outlook, atau provider lainnya
+// Konfigurasi SMTP - Menggunakan environment variables
 const createTransporter = () => {
-  // Untuk Gmail (contoh):
-  return nodemailer.createTransporter({
-    service: 'gmail',
+  return nodemailer.createTransport({
+    service: 'gmail', // Menggunakan service Gmail langsung
     auth: {
-      user: process.env.EMAIL_USER, // email Anda
-      pass: process.env.EMAIL_PASS  // app password (bukan password biasa)
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    },
+    // Opsi tambahan untuk Gmail
+    tls: {
+      rejectUnauthorized: false
     }
   });
-
-  // Atau untuk provider lain:
-  /*
-  return nodemailer.createTransporter({
-    host: 'smtp.your-provider.com',
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
-  */
 };
 
 const sendResetPasswordEmail = async (to, resetLink, userName) => {
@@ -80,10 +70,8 @@ const sendResetPasswordEmail = async (to, resetLink, userName) => {
         </div>
       </body>
       </html>
-    `;
-
-    const mailOptions = {
-      from: `"Casib SMM Panel" <${process.env.EMAIL_USER}>`,
+    `;    const mailOptions = {
+      from: `"${process.env.FROM_NAME}" <${process.env.FROM_EMAIL}>`,
       to: to,
       subject: '🔐 Reset Password - Casib SMM Panel',
       html: htmlTemplate,

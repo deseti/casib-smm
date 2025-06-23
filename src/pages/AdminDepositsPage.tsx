@@ -14,6 +14,8 @@ interface Deposit {
     };
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function AdminDepositsPage() {
     const [deposits, setDeposits] = useState<Deposit[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +25,7 @@ export default function AdminDepositsPage() {
         setIsLoading(true);
         const token = localStorage.getItem('jwt_token') || localStorage.getItem('google_token');
         try {
-            const response = await fetch('http://localhost:3001/api/admin/pending-deposits', {
+            const response = await fetch(`${API_BASE_URL}/api/admin/pending-deposits`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!response.ok) throw new Error('Gagal mengambil data deposit');
@@ -45,7 +47,7 @@ export default function AdminDepositsPage() {
         
         const token = localStorage.getItem('jwt_token') || localStorage.getItem('google_token');
         try {
-            const response = await fetch(`http://localhost:3001/api/admin/approve-deposit/${depositId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/approve-deposit/${depositId}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -65,7 +67,7 @@ export default function AdminDepositsPage() {
         
         const token = localStorage.getItem('jwt_token') || localStorage.getItem('google_token');
         try {
-            const response = await fetch(`http://localhost:3001/api/admin/reject-deposit/${depositId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/reject-deposit/${depositId}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

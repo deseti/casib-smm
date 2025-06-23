@@ -4,10 +4,11 @@
 
 import { Outlet, useNavigate } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Bell, Search, Wallet } from 'lucide-react';
+import { useState } from 'react';
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 interface DashboardLayoutProps {
   onLogout: () => void;
@@ -15,6 +16,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ onLogout }: DashboardLayoutProps) {
   const navigate = useNavigate();
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const handleDepositClick = () => {
     navigate('/deposit');
@@ -23,15 +25,20 @@ export default function DashboardLayout({ onLogout }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-slate-950">
-        <AppSidebar onLogout={onLogout} />
-        
+        <AppSidebar onLogout={onLogout} open={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex-1 flex flex-col bg-slate-950">
           {/* Header */}
           <header className="sticky top-0 z-40 border-b border-slate-700/50 bg-slate-900 backdrop-blur-md">
             <div className="flex h-16 items-center justify-between px-4 lg:px-6">
               <div className="flex items-center gap-4">
-                <SidebarTrigger className="text-slate-300 hover:text-white transition-colors" />
-                
+                {/* SidebarTrigger hanya tampil di mobile */}
+                <button
+                  className="text-slate-300 hover:text-white transition-colors md:hidden mr-2"
+                  onClick={() => setSidebarOpen(true)}
+                  aria-label="Buka menu"
+                >
+                  <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
                 {/* Search Bar */}
                 <div className="relative hidden md:block">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />

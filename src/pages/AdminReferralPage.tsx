@@ -88,7 +88,7 @@ export default function AdminReferralPage() {
         throw new Error("Sesi tidak valid, silakan login ulang.")
       }
 
-      const response = await fetch("http://localhost:3001/api/referral/admin/stats", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/referral/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       
@@ -108,7 +108,7 @@ export default function AdminReferralPage() {
     const token = localStorage.getItem("jwt_token")
     
     try {
-      const response = await fetch("http://localhost:3001/api/referral/admin/pending", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/referral/admin/pending`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       
@@ -130,7 +130,7 @@ export default function AdminReferralPage() {
     setIsProcessing(true)
     
     try {
-      const response = await fetch(`http://localhost:3001/api/referral/admin/approve/${commissionId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/referral/admin/approve/${commissionId}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -165,7 +165,7 @@ export default function AdminReferralPage() {
     setIsProcessing(true)
     
     try {
-      const response = await fetch(`http://localhost:3001/api/referral/admin/reject/${commissionId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/referral/admin/reject/${commissionId}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

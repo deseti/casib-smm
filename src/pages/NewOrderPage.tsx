@@ -13,6 +13,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import toast, { Toaster } from 'react-hot-toast'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
 // Definisikan struktur data (disesuaikan dengan ServicesPage.tsx)
 interface Service {
   id: number // ID internal dari database kita
@@ -54,7 +56,7 @@ export default function NewOrderPage() {
           throw new Error("Sesi tidak valid, silakan login ulang.")
         }
 
-        const response = await fetch("http://localhost:3001/api/services", {
+        const response = await fetch(`${API_BASE_URL}/api/services`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         if (!response.ok) throw new Error("Gagal memuat layanan dari server")
@@ -135,7 +137,7 @@ export default function NewOrderPage() {
 
     try {
       const token = localStorage.getItem('jwt_token');
-      const response = await fetch('http://localhost:3001/api/orders', {
+      const response = await fetch(`${API_BASE_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -201,7 +203,7 @@ export default function NewOrderPage() {
   const refreshUserData = async () => {
     try {
       const token = localStorage.getItem('jwt_token');
-      const response = await fetch('http://localhost:3001/api/dashboard/profile', {
+      const response = await fetch(`${API_BASE_URL}/api/dashboard/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

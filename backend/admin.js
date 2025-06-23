@@ -102,73 +102,16 @@ router.post('/reject-deposit/:id', async (req, res) => {
     }
 });
 
-// POST /api/admin/sync-services - Ambil layanan dari provider dan simpan ke DB
+// POST /api/admin/sync-services - DEPRECATED: Redirect to multi-provider
 router.post('/sync-services', async (req, res) => {
-    console.log('Memulai proses sinkronisasi layanan...');
-
-    const providerApiUrl = 'https://centralsmm.co.id/api/services';
-    const { CENTRALSMM_API_ID, CENTRALSMM_API_KEY, CENTRALSMM_SECRET_KEY } = process.env;
-
-    try {
-        // 1. Panggil API Provider untuk mendapatkan daftar layanan
-        const formBody = new URLSearchParams();
-        formBody.append('api_id', CENTRALSMM_API_ID);
-        formBody.append('api_key', CENTRALSMM_API_KEY);
-        formBody.append('secret_key', CENTRALSMM_SECRET_KEY);
-
-        const response = await fetch(providerApiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formBody.toString(),
-        });
-
-        const providerData = await response.json();
-
-        if (!providerData.response || !Array.isArray(providerData.data)) {
-            throw new Error(providerData.data?.msg || 'Gagal mengambil data layanan dari provider.');
-        }
-
-        const servicesFromProvider = providerData.data;
-        console.log(`Ditemukan ${servicesFromProvider.length} layanan dari provider.`);        // 2. Format data agar sesuai dengan tabel 'services' kita dengan markup 10%
-        const markupPercentage = 0.10; // 10% markup
-        const servicesToUpsert = servicesFromProvider.map(service => {
-            const originalPrice = parseFloat(service.price);
-            const markedUpPrice = originalPrice * (1 + markupPercentage);
-            
-            return {
-                provider_service_id: service.id,
-                name: service.service_name,
-                category: service.category_name,
-                category_name: service.category_name,
-                price_per_1000: markedUpPrice, // Harga dengan markup 10%
-                original_price: originalPrice, // Simpan harga asli untuk referensi
-                min_order: service.min,
-                max_order: service.max,
-                refill: service.refill,
-                description: service.description,
-            };
-        });
-
-        console.log(`💰 Menerapkan markup ${markupPercentage * 100}% pada ${servicesToUpsert.length} layanan`);
-
-        // 3. Gunakan 'upsert' untuk memasukkan/memperbarui data di Supabase
-        const { error } = await supabase
-            .from('services')
-            .upsert(servicesToUpsert, {
-                onConflict: 'provider_service_id'
-            });
-        
-        if (error) throw error;
-
-        res.status(200).json({ 
-            message: 'Sinkronisasi layanan berhasil.',
-            synced_count: servicesFromProvider.length
-        });
-
-    } catch (error) {
-        console.error('Error saat sinkronisasi layanan:', error.message);
-        res.status(500).json({ error: error.message });
-    }
+    res.status(410).json({ 
+        error: 'Endpoint deprecated',
+        message: 'This endpoint has been removed. Please use /api/providers/sync-all for multi-provider sync or /api/providers/:id/sync-services for specific provider sync.',
+        alternatives: [
+            'POST /api/providers/sync-all - Sync all active providers',
+            'POST /api/providers/:id/sync-services - Sync specific provider'
+        ]
+    });
 });
 
 module.exports = router;
