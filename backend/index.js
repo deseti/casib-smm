@@ -18,7 +18,7 @@ const dashboardRouter = require('./dashboard');
 const ordersRouter = require('./orders');
 const depositsRouter = require('./deposits');
 const adminRouter = require('./admin');
-const providerRouter = require('./provider'); // <-- TAMBAHKAN BARIS INI
+const providersRouter = require('./providers'); // <-- TAMBAHKAN BARIS INI
 const providersRouter = require('./providers'); // <-- NEW: Multi-provider management
 const referralRouter = require('./referral'); // <-- TAMBAHKAN BARIS INI
 const userProfileRoutes = require('./userProfile');
@@ -48,7 +48,7 @@ app.use('/api/services', authenticateToken, servicesRouter);
 app.use('/api/dashboard', authenticateToken, dashboardRouter);
 app.use('/api/orders', authenticateToken, ordersRouter);
 app.use('/api/deposits', authenticateToken, depositsRouter);
-app.use('/api/provider', authenticateToken, providerRouter); // <-- TAMBAHKAN BARIS INI
+app.use('/api/providers' authenticateToken, providerRouter); // <-- TAMBAHKAN BARIS INI
 app.use('/api/referral', authenticateToken, referralRouter); // <-- TAMBAHKAN BARIS INI
 
 // User profile routes
