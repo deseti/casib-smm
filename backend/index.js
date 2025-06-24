@@ -19,7 +19,6 @@ const ordersRouter = require('./orders');
 const depositsRouter = require('./deposits');
 const adminRouter = require('./admin');
 const providersRouter = require('./providers'); // <-- TAMBAHKAN BARIS INI
-const providersRouter = require('./providers'); // <-- NEW: Multi-provider management
 const referralRouter = require('./referral'); // <-- TAMBAHKAN BARIS INI
 const userProfileRoutes = require('./userProfile');
 
@@ -31,6 +30,7 @@ app.use(express.json());
 // GUNAKAN ENV UNTUK CORS AGAR MUDAH GANTI DOMAIN
 const allowedOrigins = [
   'https://smm.casib.xyz',
+  'https://sosial.casib.xyz', // <--- tambahkan baris ini
   'http://localhost:5173', // opsional: untuk dev
 ];
 app.use(cors({ origin: allowedOrigins, credentials: true }));
@@ -48,7 +48,6 @@ app.use('/api/services', authenticateToken, servicesRouter);
 app.use('/api/dashboard', authenticateToken, dashboardRouter);
 app.use('/api/orders', authenticateToken, ordersRouter);
 app.use('/api/deposits', authenticateToken, depositsRouter);
-app.use('/api/providers' authenticateToken, providerRouter); // <-- TAMBAHKAN BARIS INI
 app.use('/api/referral', authenticateToken, referralRouter); // <-- TAMBAHKAN BARIS INI
 
 // User profile routes
@@ -218,3 +217,7 @@ async function autoSyncOrderStatus() {
     console.error('❌ Error dalam auto-sync status:', error);
   }
 }
+
+// Pastikan semua router di-export dengan benar di masing-masing file router
+// Contoh di setiap file router (paling bawah):
+// module.exports = router;
